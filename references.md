@@ -1,5 +1,5 @@
 
-Список используемой литературы:
+# Список используемой литературы:
 
 1. Рашка С., Лю Ю., Мирджалили В. Машинное обучение с PYTORCH и SCIKIT-LEARN. - Астана: Foliant, 2024. - 688 c. 
 
@@ -9,7 +9,7 @@
 
 Книга содержит задачи машинного обучения, такие как загрузка и обработка текстовых и числовых данных, отбор моделей и приведены практические решения.
 
-Научные статьи:
+## Научные статьи:
 
 1. Balikci Ci̇cek I, Kucukakcali Z. Analysis of voice data based onassociative classification rules for early diagnosis of Parkinson'sdisease. Med Science. 2025;14(2):355-61.https://www.researchgate.net/publication/392411659_Analysis_of_voice_data_based_on_associative_classification_rules_for_early_diagnosis_of_Parkinson's_disease
 Статья о применении методов машинного обучения для ранней диагностики болезни Паркинсона.
