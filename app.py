@@ -9,40 +9,89 @@ st.set_page_config(
     layout="wide"
 )
 
+HEALTHY_COLOR = "#22C55E"
+DISEASE_COLOR = "#EF4444"
+BLUE = "#2563EB"
+DARK = "#1E293B"
+
 st.markdown("""
 <style>
 .stApp {
-    background-color: #F8FAFC;
-}
-
-h1, h2, h3 {
-    color: #0F172A;
+    background: linear-gradient(180deg, #F8FBFF 0%, #F3F8FB 100%);
 }
 
 .block-container {
-    padding-top: 2rem;
+    padding-top: 1.6rem;
+    padding-bottom: 3rem;
+}
+
+h1, h2, h3 {
+    color: #1E293B;
 }
 
 .subtitle {
-    color: #475569;
+    color: #64748B;
     font-size: 18px;
-    margin-bottom: 20px;
+    margin-top: -8px;
+    margin-bottom: 22px;
+}
+
+.hero-card {
+    background: linear-gradient(135deg, #E0F2FE 0%, #ECFEFF 100%);
+    border: 1px solid #BAE6FD;
+    border-radius: 22px;
+    padding: 28px 32px;
+    margin-bottom: 26px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.hero-title {
+    font-size: 38px;
+    font-weight: 800;
+    color: #0F172A;
+    margin-bottom: 8px;
+}
+
+.hero-text {
+    font-size: 17px;
+    color: #475569;
+}
+
+.metric-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 18px 20px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.metric-label {
+    color: #64748B;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.metric-value {
+    color: #0F172A;
+    font-size: 34px;
+    font-weight: 750;
 }
 
 .info-card {
-    background: white;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     padding: 22px;
-    border-radius: 16px;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
-    margin-bottom: 18px;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    margin-bottom: 16px;
 }
 
 .success-box {
     background-color: #ECFDF5;
     color: #065F46;
     padding: 18px;
-    border-radius: 14px;
-    border-left: 6px solid #16A34A;
+    border-radius: 16px;
+    border-left: 6px solid #22C55E;
     font-weight: 600;
 }
 
@@ -50,9 +99,23 @@ h1, h2, h3 {
     background-color: #FEF2F2;
     color: #991B1B;
     padding: 18px;
-    border-radius: 14px;
-    border-left: 6px solid #DC2626;
+    border-radius: 16px;
+    border-left: 6px solid #EF4444;
     font-weight: 600;
+}
+
+.blue-box {
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+    padding: 16px;
+    border-radius: 14px;
+    border-left: 5px solid #3B82F6;
+    margin-bottom: 18px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #E2E8F0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -61,7 +124,7 @@ h1, h2, h3 {
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/parkinsons.data")
-    df["patient_id"] = df["name"].str.extract(r"(S\d+)")
+    df["patient_id"] = df["name"].str.extract(r"(S\\d+)")
     df["status_label"] = df["status"].map({
         0: "Здоровый",
         1: "Болезнь Паркинсона"
@@ -90,18 +153,51 @@ tab1, tab2, tab3 = st.tabs([
 
 
 with tab1:
-    st.title("🔬 Early Parkinson's Disease Detection")
-    st.markdown(
-        "<div class='subtitle'>Раннее выявление болезни Паркинсона по голосовым характеристикам пациентов</div>",
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+    <div class="hero-card">
+        <div class="hero-title">🔬 Early Parkinson's Disease Detection</div>
+        <div class="hero-text">
+            Анализ голосовых характеристик пациентов и демонстрация модели машинного обучения
+            для раннего выявления признаков болезни Паркинсона.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Записей", df.shape[0])
-    col2.metric("Признаков", len(feature_columns))
-    col3.metric("Пациентов", df["patient_id"].nunique())
-    col4.metric("Классов", df["status"].nunique())
 
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Записей</div>
+            <div class="metric-value">{df.shape[0]}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Признаков</div>
+            <div class="metric-value">{len(feature_columns)}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Пациентов</div>
+            <div class="metric-value">{df["patient_id"].nunique()}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col4:
+        st.markdown(f"""
+        <div class="metric-card">
+            <div class="metric-label">Классов</div>
+            <div class="metric-value">{df["status"].nunique()}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.write("")
     st.subheader("Баланс классов")
 
     class_counts = df["status_label"].value_counts().reset_index()
@@ -116,14 +212,21 @@ with tab1:
         height=420,
         color="Класс",
         color_discrete_map={
-            "Здоровый": "#16A34A",
-            "Болезнь Паркинсона": "#DC2626"
+            "Здоровый": HEALTHY_COLOR,
+            "Болезнь Паркинсона": DISEASE_COLOR
         }
     )
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color=DARK),
+        title_font=dict(size=18),
+        bargap=0.35
+    )
+    st.plotly_chart(fig, width="stretch")
 
     st.subheader("Фрагмент данных")
-    st.dataframe(df.head(20), use_container_width=True)
+    st.dataframe(df.head(20), width="stretch", hide_index=True)
 
     st.subheader("Распределение ключевых признаков")
 
@@ -155,11 +258,17 @@ with tab1:
         title=f"Распределение признака {feature}",
         height=520,
         color_discrete_map={
-            "Здоровый": "#16A34A",
-            "Болезнь Паркинсона": "#DC2626"
+            "Здоровый": HEALTHY_COLOR,
+            "Болезнь Паркинсона": DISEASE_COLOR
         }
     )
-    st.plotly_chart(fig_hist, use_container_width=True)
+    fig_hist.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color=DARK),
+        title_font=dict(size=18)
+    )
+    st.plotly_chart(fig_hist, width="stretch")
 
     st.subheader("Корреляционная матрица")
 
@@ -173,12 +282,22 @@ with tab1:
         corr,
         title="Корреляция числовых признаков",
         color_continuous_scale="RdBu_r",
-        aspect="auto",
-        width=950,
-        height=620
+        range_color=[-1, 1],
+        aspect="equal",
+        width=820,
+        height=820
     )
-    fig_corr.update_layout(margin=dict(l=40, r=40, t=80, b=120))
-    st.plotly_chart(fig_corr, use_container_width=False)
+    fig_corr.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color=DARK),
+        title_font=dict(size=18),
+        margin=dict(l=40, r=40, t=80, b=120)
+    )
+
+    left, center, right = st.columns([1, 4, 1])
+    with center:
+        st.plotly_chart(fig_corr, width="content")
 
 
 with tab2:
@@ -188,8 +307,6 @@ with tab2:
         unsafe_allow_html=True
     )
 
-    st.subheader("1. Модели с агрегацией данных")
-
     metrics_agg = pd.DataFrame({
         "Модель": ["KNN", "XGBoost", "Random Forest", "Logistic Regression", "Decision Tree", "SVM"],
         "ROC-AUC": [1.000, 1.000, 1.000, 0.750, 0.750, 0.844],
@@ -197,21 +314,6 @@ with tab2:
         "Recall": [1.000, 1.000, 1.000, 1.000, 1.000, 1.000],
         "Precision": [0.750, 0.860, 0.857, 0.833, 0.857, 0.857]
     })
-
-    st.dataframe(metrics_agg, hide_index=True, use_container_width=True)
-
-    fig_agg = px.bar(
-        metrics_agg,
-        x="Модель",
-        y="F1",
-        text="F1",
-        title="F1-score моделей с агрегацией данных",
-        height=430
-    )
-    fig_agg.update_traces(marker_color="#2563EB")
-    st.plotly_chart(fig_agg, use_container_width=True)
-
-    st.subheader("2. Модели без агрегации данных")
 
     metrics_no_agg = pd.DataFrame({
         "Модель": ["KNN", "XGBoost", "Random Forest", "Logistic Regression", "Decision Tree", "SVM"],
@@ -221,7 +323,29 @@ with tab2:
         "Precision": [0.828, 0.831, 1.000, None, 0.919, 0.938]
     })
 
-    st.dataframe(metrics_no_agg, hide_index=True, use_container_width=True)
+    st.subheader("1. Модели с агрегацией данных")
+    st.dataframe(metrics_agg, hide_index=True, width="stretch")
+
+    fig_agg = px.bar(
+        metrics_agg,
+        x="Модель",
+        y="F1",
+        text="F1",
+        title="F1-score моделей с агрегацией данных",
+        height=430
+    )
+    fig_agg.update_traces(marker_color=BLUE)
+    fig_agg.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color=DARK),
+        title_font=dict(size=18),
+        yaxis_range=[0, 1.05]
+    )
+    st.plotly_chart(fig_agg, width="stretch")
+
+    st.subheader("2. Модели без агрегации данных")
+    st.dataframe(metrics_no_agg, hide_index=True, width="stretch")
 
     fig_no_agg = px.bar(
         metrics_no_agg,
@@ -231,8 +355,15 @@ with tab2:
         title="F1-score моделей без агрегации данных",
         height=430
     )
-    fig_no_agg.update_traces(marker_color="#2563EB")
-    st.plotly_chart(fig_no_agg, use_container_width=True)
+    fig_no_agg.update_traces(marker_color=BLUE)
+    fig_no_agg.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        font=dict(color=DARK),
+        title_font=dict(size=18),
+        yaxis_range=[0, 1.05]
+    )
+    st.plotly_chart(fig_no_agg, width="stretch")
 
     st.subheader("3. Итоговые выводы")
 
@@ -251,7 +382,8 @@ with tab2:
     with col2:
         st.markdown("""
         <div class='info-card'>
-        Подход без агрегации со сплитом по пациентам позволяет избежать утечки данных между train и test.
+        Подход без агрегации со сплитом по пациентам позволяет сохранить 195 записей
+        и снизить риск утечки данных между train и test.
         </div>
         """, unsafe_allow_html=True)
 
@@ -276,18 +408,19 @@ with tab2:
         ]
     })
 
-    st.dataframe(best_models, hide_index=True, use_container_width=True)
+    st.dataframe(best_models, hide_index=True, width="stretch")
 
 
 with tab3:
     st.title("Инференс")
     st.markdown(
-        "<div class='subtitle'>Проверка прогноза по голосовым признакам</div>",
+        "<div class='subtitle'>Проверка модели на введённых данных</div>",
         unsafe_allow_html=True
     )
 
-    st.info(
-        "Значения можно изменять вручную."
+    st.markdown(
+        "<div class='blue-box'>Значения можно изменять вручную.</div>",
+        unsafe_allow_html=True
     )
 
     input_values = {}
@@ -313,7 +446,7 @@ with tab3:
     input_df = pd.DataFrame([input_values])
 
     st.subheader("Введённые значения")
-    st.dataframe(input_df, use_container_width=True)
+    st.dataframe(input_df, width="stretch", hide_index=True)
 
     if st.button("Вывести прогноз"):
         prediction = rf_model.predict(input_df)[0]
