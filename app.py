@@ -3,17 +3,20 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
+
 st.set_page_config(
-    page_title="Early Parkinson's Disease Detection",
+    page_title="Раннее выявление болезни Паркинсона",
     page_icon="🔬",
     layout="wide"
 )
 
-# настройка цвета
-HEALTHY_COLOR = "#22C55E"
-DISEASE_COLOR = "#EF4444"
-BLUE = "#2563EB"
-DARK = "#1E293B"
+
+# Цвета для графиков и блоков
+healthy_color = "#22C55E"
+disease_color = "#EF4444"
+main_blue = "#2563EB"
+text_dark = "#1E293B"
+
 
 st.markdown("""
 <style>
@@ -141,7 +144,7 @@ h1, h2, h3 {
 """, unsafe_allow_html=True)
 
 
-# Загрузка данных
+# Загружаем датасет
 @st.cache_data
 def load_data():
     df = pd.read_csv("data/parkinsons.data")
@@ -153,7 +156,7 @@ def load_data():
     return df
 
 
-# Загрузка обученной модели
+# Загружаем модель для прогнозирования
 @st.cache_resource
 def load_model():
     return joblib.load("models/rf_model.joblib")
@@ -162,52 +165,51 @@ def load_model():
 df = load_data()
 rf_model = load_model()
 
-feature_columns = [
+features = [
     col for col in df.columns
     if col not in ["name", "status", "patient_id", "status_label"]
 ]
 
-# Sidebar
+
+# Боковая панель с краткой информацией
 with st.sidebar:
     st.title("🔬 Parkinson ML")
 
     st.info(
-        "Приложение демонстрирует анализ голосовых характеристик "
-        "и работу модели машинного обучения для раннего выявления признаков болезни Паркинсона."
+        "Приложение показывает анализ голосовых характеристик "
+        "и работу модели машинного обучения для выявления признаков болезни Паркинсона."
     )
 
     st.markdown("### Данные")
     st.write(f"Записей: **{df.shape[0]}**")
     st.write(f"Пациентов: **{df['patient_id'].nunique()}**")
-    st.write(f"Признаков: **{len(feature_columns)}**")
+    st.write(f"Признаков: **{len(features)}**")
 
-    st.markdown("### Модель для инференса")
+    st.markdown("### Модель для прогноза")
     st.success("Random Forest")
 
     st.markdown("### Основная метрика")
     st.write("F1-score")
 
     st.caption(
-        "Модель не ставит медицинский диагноз. "
-        "Результат предназначен для демонстрации ML-подхода."
+        "Модель выполнена в учебных целях и не является медицинским диагностическим инструментом."
     )
 
 
 tab1, tab2, tab3 = st.tabs([
     "Описание данных и EDA",
     "Модели и сравнение",
-    "Инференс"
+    "Прогнозирование"
 ])
 
 
-# Вкладка 1. Описание данных и EDA
+# Анализ данных
 with tab1:
     st.markdown("""
     <div class="hero-card">
-        <div class="hero-title">🔬 Early Parkinson's Disease Detection</div>
+        <div class="hero-title">🔬 Раннее выявление болезни Паркинсона</div>
         <div class="hero-text">
-            Анализ голосовых характеристик пациентов и демонстрация модели машинного обучения
-            для раннего выявления признаков болезни Паркинсона.
+            Анализ голосовых данных пациентов и прогнозирование болезни Паркинсона.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -226,7 +228,7 @@ with tab1:
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-label">Признаков</div>
-            <div class="metric-value">{len(feature_columns)}</div>
+            <div class="metric-value">{len(features)}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -249,11 +251,11 @@ with tab1:
     st.write("")
     st.subheader("Баланс классов")
 
-    class_counts = df["status_label"].value_counts().reset_index()
-    class_counts.columns = ["Класс", "Количество"]
+    counts = df["status_label"].value_counts().reset_index()
+    counts.columns = ["Класс", "Количество"]
 
     fig = px.bar(
-        class_counts,
+        counts,
         x="Класс",
         y="Количество",
         text="Количество",
@@ -261,24 +263,24 @@ with tab1:
         height=360,
         color="Класс",
         color_discrete_map={
-            "Здоровый": HEALTHY_COLOR,
-            "Болезнь Паркинсона": DISEASE_COLOR
+            "Здоровый": healthy_color,
+            "Болезнь Паркинсона": disease_color
         }
     )
     fig.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        font=dict(color=DARK),
+        font=dict(color=text_dark),
         title_font=dict(size=17),
         bargap=0.45,
         margin=dict(l=40, r=40, t=70, b=50)
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader("Фрагмент данных")
+    st.subheader("Первые строки датасета")
     st.dataframe(df.head(20), use_container_width=True, hide_index=True)
 
-    st.subheader("Распределение ключевых признаков")
+    st.subheader("Анализ признаков")
 
     feature = st.selectbox(
         "Выберите признак",
@@ -308,26 +310,26 @@ with tab1:
         title=f"Распределение признака {feature}",
         height=420,
         color_discrete_map={
-            "Здоровый": HEALTHY_COLOR,
-            "Болезнь Паркинсона": DISEASE_COLOR
+            "Здоровый": healthy_color,
+            "Болезнь Паркинсона": disease_color
         }
     )
     fig_hist.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        font=dict(color=DARK),
+        font=dict(color=text_dark),
         title_font=dict(size=17),
         margin=dict(l=40, r=40, t=70, b=55)
     )
     st.plotly_chart(fig_hist, use_container_width=True)
 
-    st.subheader("Корреляционная матрица")
+    st.subheader("Корреляции между признаками")
 
-    numeric_df = df.drop(
+    corr_df = df.drop(
         columns=["name", "patient_id", "status_label"]
     ).select_dtypes(include="number")
 
-    corr = numeric_df.corr()
+    corr = corr_df.corr()
 
     fig_corr = px.imshow(
         corr,
@@ -341,7 +343,7 @@ with tab1:
     fig_corr.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        font=dict(color=DARK),
+        font=dict(color=text_dark),
         title_font=dict(size=17),
         margin=dict(l=30, r=30, t=70, b=100)
     )
@@ -351,7 +353,7 @@ with tab1:
         st.plotly_chart(fig_corr, use_container_width=False)
 
 
-# Вкладка 2. Модели и сравнение
+# Сравнение обученных моделей
 with tab2:
     st.title("Модели и сравнение")
     st.markdown(
@@ -386,11 +388,11 @@ with tab2:
         title="F1-score моделей с агрегацией данных",
         height=360
     )
-    fig_agg.update_traces(marker_color=BLUE)
+    fig_agg.update_traces(marker_color=main_blue)
     fig_agg.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        font=dict(color=DARK),
+        font=dict(color=text_dark),
         title_font=dict(size=17),
         yaxis_range=[0, 1.05],
         margin=dict(l=40, r=40, t=70, b=55)
@@ -408,11 +410,11 @@ with tab2:
         title="F1-score моделей без агрегации данных",
         height=360
     )
-    fig_no_agg.update_traces(marker_color=BLUE)
+    fig_no_agg.update_traces(marker_color=main_blue)
     fig_no_agg.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        font=dict(color=DARK),
+        font=dict(color=text_dark),
         title_font=dict(size=17),
         yaxis_range=[0, 1.05],
         margin=dict(l=40, r=40, t=70, b=55)
@@ -446,7 +448,7 @@ with tab2:
             "Максимальный F1",
             "Максимальный Recall",
             "Максимальный Precision",
-            "Модель для инференса"
+            "Модель для прогноза"
         ],
         "Модель": [
             "Random Forest",
@@ -458,7 +460,7 @@ with tab2:
             "F1 = 0.986",
             "Recall = 1.000",
             "Precision = 1.000",
-            "Используется во вкладке инференса"
+            "Используется во вкладке прогнозирования"
         ]
     })
 
@@ -469,15 +471,15 @@ with tab2:
         <b>Основные выводы исследования:</b><br><br>
         • Лучший результат по F1-score показала модель Random Forest.<br>
         • Максимальный F1-score составил 0.986.<br>
-        • Для инференса выбрана Random Forest как наиболее сбалансированная модель.<br>
-        • Голосовые признаки могут использоваться для построения модели раннего выявления признаков болезни Паркинсона.
+        • Для прогноза выбрана Random Forest как наиболее сбалансированная модель.<br>
+        • Голосовые признаки могут использоваться для построения модели выявления признаков болезни Паркинсона.
     </div>
     """, unsafe_allow_html=True)
 
 
-# Вкладка 3. Инференс
+# Прогноз по пользовательским данным
 with tab3:
-    st.title("Инференс")
+    st.title("Прогнозирование")
     st.markdown(
         "<div class='subtitle'>Проверка модели на введённых данных</div>",
         unsafe_allow_html=True
@@ -488,12 +490,20 @@ with tab3:
         unsafe_allow_html=True
     )
 
-    input_values = {}
+    st.markdown("""
+    ### Как пользоваться
+
+    1. Введите значения голосовых характеристик.
+    2. Нажмите кнопку «Вывести прогноз».
+    3. Модель Random Forest рассчитает вероятность наличия признаков болезни Паркинсона.
+    """)
+
+    user_input = {}
 
     col_left, col_right = st.columns(2)
 
-    # Формирование входного вектора признаков
-    for i, col in enumerate(feature_columns):
+    # Собираем значения, введённые пользователем
+    for i, col in enumerate(features):
         median_value = float(df[col].median())
         min_value = float(df[col].min())
         max_value = float(df[col].max())
@@ -501,7 +511,7 @@ with tab3:
         target_col = col_left if i % 2 == 0 else col_right
 
         with target_col:
-            input_values[col] = st.number_input(
+            user_input[col] = st.number_input(
                 label=col,
                 min_value=min_value,
                 max_value=max_value,
@@ -509,12 +519,12 @@ with tab3:
                 format="%.6f"
             )
 
-    input_df = pd.DataFrame([input_values])
+    input_df = pd.DataFrame([user_input])
 
     st.subheader("Введённые значения")
     st.dataframe(input_df, use_container_width=True, hide_index=True)
 
-    # Получение прогноза модели Random Forest
+    # Выполняем прогноз
     if st.button("Вывести прогноз"):
         prediction = rf_model.predict(input_df)[0]
 
@@ -543,6 +553,5 @@ with tab3:
             )
 
         st.caption(
-            "Результат предназначен только для демонстрации работы модели "
-            "и не является медицинским заключением."
+            "Модель разработана в учебных целях и не является медицинским диагностическим инструментом."
         )
