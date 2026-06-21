@@ -9,6 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
+# настройка цвета
 HEALTHY_COLOR = "#22C55E"
 DISEASE_COLOR = "#EF4444"
 BLUE = "#2563EB"
@@ -127,6 +128,15 @@ h1, h2, h3 {
     border-left: 5px solid #3B82F6;
     margin-bottom: 18px;
 }
+
+.conclusion-box {
+    background-color: #FFFFFF;
+    border: 1px solid #BFDBFE;
+    border-radius: 18px;
+    padding: 20px 24px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+    margin-top: 12px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -143,7 +153,7 @@ def load_data():
     return df
 
 
-# Загрузка модели
+# Загрузка обученной модели
 @st.cache_resource
 def load_model():
     return joblib.load("models/rf_model.joblib")
@@ -157,6 +167,32 @@ feature_columns = [
     if col not in ["name", "status", "patient_id", "status_label"]
 ]
 
+# Sidebar
+with st.sidebar:
+    st.title("🔬 Parkinson ML")
+
+    st.info(
+        "Приложение демонстрирует анализ голосовых характеристик "
+        "и работу модели машинного обучения для раннего выявления признаков болезни Паркинсона."
+    )
+
+    st.markdown("### Данные")
+    st.write(f"Записей: **{df.shape[0]}**")
+    st.write(f"Пациентов: **{df['patient_id'].nunique()}**")
+    st.write(f"Признаков: **{len(feature_columns)}**")
+
+    st.markdown("### Модель для инференса")
+    st.success("Random Forest")
+
+    st.markdown("### Основная метрика")
+    st.write("F1-score")
+
+    st.caption(
+        "Модель не ставит медицинский диагноз. "
+        "Результат предназначен для демонстрации ML-подхода."
+    )
+
+
 tab1, tab2, tab3 = st.tabs([
     "Описание данных и EDA",
     "Модели и сравнение",
@@ -165,7 +201,6 @@ tab1, tab2, tab3 = st.tabs([
 
 
 # Вкладка 1. Описание данных и EDA
-
 with tab1:
     st.markdown("""
     <div class="hero-card">
@@ -316,7 +351,7 @@ with tab1:
         st.plotly_chart(fig_corr, use_container_width=False)
 
 
-# Вкладка 2. СРавнение моделей
+# Вкладка 2. Модели и сравнение
 with tab2:
     st.title("Модели и сравнение")
     st.markdown(
@@ -429,6 +464,16 @@ with tab2:
 
     st.dataframe(best_models, hide_index=True, use_container_width=True)
 
+    st.markdown("""
+    <div class="conclusion-box">
+        <b>Основные выводы исследования:</b><br><br>
+        • Лучший результат по F1-score показала модель Random Forest.<br>
+        • Максимальный F1-score составил 0.986.<br>
+        • Для инференса выбрана Random Forest как наиболее сбалансированная модель.<br>
+        • Голосовые признаки могут использоваться для построения модели раннего выявления признаков болезни Паркинсона.
+    </div>
+    """, unsafe_allow_html=True)
+
 
 # Вкладка 3. Инференс
 with tab3:
@@ -447,6 +492,7 @@ with tab3:
 
     col_left, col_right = st.columns(2)
 
+    # Формирование входного вектора признаков
     for i, col in enumerate(feature_columns):
         median_value = float(df[col].median())
         min_value = float(df[col].min())
@@ -468,6 +514,7 @@ with tab3:
     st.subheader("Введённые значения")
     st.dataframe(input_df, use_container_width=True, hide_index=True)
 
+    # Получение прогноза модели Random Forest
     if st.button("Вывести прогноз"):
         prediction = rf_model.predict(input_df)[0]
 
@@ -487,8 +534,15 @@ with tab3:
             )
 
         if probability is not None:
+            st.write(f"Вероятность болезни Паркинсона: **{probability:.1%}**")
+            st.progress(float(probability))
+
             st.metric(
                 "Вероятность класса Болезнь Паркинсона",
                 f"{probability:.2%}"
             )
 
+        st.caption(
+            "Результат предназначен только для демонстрации работы модели "
+            "и не является медицинским заключением."
+        )
